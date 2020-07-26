@@ -3,41 +3,37 @@ const EMPTY_HEART = '♡'
 const FULL_HEART = '♥'
 
 // Your JavaScript code goes here!
-let likeHeartButtons = document.getElementsByClassName('like')
+let likeBtns = document.querySelectorAll('.like');
+let modal = document.querySelector('div#modal');
+let modalMessage = modal.querySelector('p#modal-message')
 
-for (const button of likeHeartButtons) {
-  button.addEventListener("click", likeHeart)
+likeBtns.forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    let glyph = btn.querySelector('span.like-glyph')
+    if (glyph.textContent === EMPTY_HEART) {
+      glyph.textContent = FULL_HEART
+      glyph.classList.add('activated-heart')
+    } else {
+      glyph.textContent = EMPTY_HEART
+      glyph.classList.remove('activated-heart')
+    }
+  })
+})
+
+mimicServerCall()
+  .then(serverMessage => {
+    alert('You notified the server!')
+    alert(serverMessage)
+  })
+  .catch(err => {
+    modal.classList.remove('hidden');
+    modalMessage.textContent = err.message
+    setTimeout(hideModal, 5000)
+  })
+
+const hideModal = () => {
+  modal.classList.add('hidden')
 }
-
-function fullHeart(heart) {
-  heart.innerText = FULL_HEART;
-  heart.className = "activated-heart"
-}
-
-function emptyHeart(heart) {
-  heart.innerText = EMPTY_HEART;
-  heart.className = "";
-}
-
-function likeHeart(e) {
-  let button = e.target;
-  mimicServerCall("url")
-    .then(function(serverCallMessage) {
-      alert(serverCallMessage);
-      if (button.innerText === EMPTY_HEART) {
-        fullHeart(button);
-      } else {
-        emptyHeart(button);
-      }
-    })
-    .catch(function(error) {
-      let errorMessage = document.getElementById("modal");
-      errorMessage.setAttributes('class', 'visible');
-      errorMessage.innerHTML += `${error}`
-      setTimeout(function() { errorMessage.setAttributes('class', 'hidden')}, 5000);
-    });
-}
-
 
 
 
@@ -46,9 +42,9 @@ function likeHeart(e) {
 // Ignore after this point. Used only for demo purposes
 //------------------------------------------------------------------------------
 
-function mimicServerCall(url="http://mimicServer.example.com", config={}) {
-  return new Promise(function(resolve, reject) {
-    setTimeout(function() {
+function mimicServerCall(url = "http://mimicServer.example.com", config = {}) {
+  return new Promise(function (resolve, reject) {
+    setTimeout(function () {
       let isRandomFailure = Math.random() < .2
       if (isRandomFailure) {
         reject("Random server error. Try again.");
